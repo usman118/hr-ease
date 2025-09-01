@@ -21,7 +21,9 @@
       "@/root/*": ["src/root/*"],
       "@/database/*": ["src/database/*"],
       "@/migrations/*": ["src/migrations/*"],
-      "@/helpers/*": ["src/helpers/*"]
+      "@/helpers/*": ["src/helpers/*"],
+      "@/services/*": ["src/services/*"],
+      "@/templates/*": ["src/templates/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

@@ -1,3 +1,4 @@
+export { AuthHelper } from './auth.helper';
 export { CompanyHelper } from './company.helper';
 export { JobApplicationHelper } from './job-application.helper';
 export { JobPostHelper } from './job-post.helper';
