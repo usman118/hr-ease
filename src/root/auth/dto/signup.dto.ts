@@ -1,17 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
+/**
+ * Admin-only signup DTO
+ * Only admins can create new accounts
+ */
 export class SignupDto {
   @ApiProperty({
-    description: 'User email address',
-    example: 'john.doe@example.com',
+    description: 'Admin email address',
+    example: 'admin@hrease.com',
   })
   @IsEmail()
   email: string;
 
   @ApiProperty({
-    description: 'User password (minimum 6 characters)',
-    example: 'password123',
+    description: 'Admin password (minimum 6 characters)',
+    example: 'adminpassword123',
     minLength: 6,
   })
   @IsString()
@@ -19,15 +23,15 @@ export class SignupDto {
   password: string;
 
   @ApiProperty({
-    description: 'User first name',
-    example: 'John',
+    description: 'Admin first name',
+    example: 'System',
   })
   @IsString()
   firstName: string;
 
   @ApiProperty({
-    description: 'User last name',
-    example: 'Doe',
+    description: 'Admin last name',
+    example: 'Administrator',
   })
   @IsString()
   lastName: string;

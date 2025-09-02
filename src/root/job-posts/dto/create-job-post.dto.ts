@@ -7,51 +7,65 @@ import {
   IsOptional,
   IsPositive,
   IsString,
-  IsUUID,
 } from 'class-validator';
 
 export class CreateJobPostDto {
-  @ApiProperty({ description: 'Job title' })
+  @ApiProperty({
+    description: 'Job title',
+    example: 'Senior Software Engineer',
+  })
   @IsString()
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ description: 'Job description' })
+  @ApiProperty({
+    description: 'Job description',
+    example:
+      'We are looking for a senior software engineer to join our team...',
+  })
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ description: 'Job requirements' })
+  @ApiProperty({
+    description: 'Job requirements',
+    example: '5+ years of experience in TypeScript, React, and Node.js',
+  })
   @IsString()
   @IsNotEmpty()
   requirements: string;
 
-  @ApiProperty({ description: 'Job location' })
+  @ApiProperty({
+    description: 'Job location',
+    example: 'New York, NY',
+  })
   @IsString()
   @IsNotEmpty()
   location: string;
 
-  @ApiProperty({ description: 'Salary amount', required: false })
+  @ApiProperty({
+    description: 'Annual salary amount',
+    example: 120000,
+    required: false,
+  })
   @IsOptional()
   @IsNumber()
   @IsPositive()
   salary?: number;
 
-  @ApiProperty({ enum: JobType, description: 'Job type' })
+  @ApiProperty({
+    enum: JobType,
+    description: 'Type of employment',
+    example: JobType.FULL_TIME,
+  })
   @IsEnum(JobType)
   jobType: JobType;
 
-  @ApiProperty({ enum: JobLevel, description: 'Job level' })
+  @ApiProperty({
+    enum: JobLevel,
+    description: 'Job experience level',
+    example: JobLevel.SENIOR,
+  })
   @IsEnum(JobLevel)
   jobLevel: JobLevel;
-
-  @ApiProperty({ description: 'Company ID' })
-  @IsUUID()
-  @IsNotEmpty()
-  companyId: string;
-
-  @ApiProperty({ description: 'Company HR ID', required: false })
-  @IsOptional()
-  @IsUUID()
-  companyHrId?: string;
 }

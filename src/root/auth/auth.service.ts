@@ -1,4 +1,5 @@
 import { User } from '@/entities/user.entity';
+import { UserRole } from '@/enums/user.enum';
 import { AuthHelper, UserHelper } from '@/helpers';
 import { ForgotPasswordDto } from '@/root/auth/dto/forgot-password.dto';
 import { LoginDto } from '@/root/auth/dto/login.dto';
@@ -27,13 +28,14 @@ export class AuthService {
     // Check if email is already in use
     await AuthHelper.checkEmailAvailability(this.userRepo, email);
 
-    // Hash password and create user
+    // Hash password and create admin user (signup is admin-only)
     const hashedPassword = await AuthHelper.hashPassword(password);
     const user = this.userRepo.create({
       email,
       password: hashedPassword,
       firstName,
       lastName,
+      role: UserRole.ADMIN, // Set role to admin for signup
     });
     await this.userRepo.save(user);
 

@@ -1,4 +1,3 @@
-import { JobType } from '@/enums/job.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
@@ -9,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { JobLevel, JobType } from '../enums/job.enum';
 import { Company } from './company.entity';
 import { User } from './user.entity';
 
@@ -43,17 +43,30 @@ export class JobPost {
   requirements: string;
 
   @ApiProperty({
-    description: 'Employment type',
+    description: 'Job type',
     example: 'full-time',
     enum: JobType,
   })
   @Column({
-    name: 'employment_type',
+    name: 'job_type',
     type: 'enum',
     enum: JobType,
     default: JobType.FULL_TIME,
   })
-  employmentType: JobType;
+  jobType: JobType;
+
+  @ApiProperty({
+    description: 'Job level',
+    example: 'senior',
+    enum: JobLevel,
+  })
+  @Column({
+    name: 'job_level',
+    type: 'enum',
+    enum: JobLevel,
+    default: JobLevel.MID,
+  })
+  jobLevel: JobLevel;
 
   @ApiProperty({
     description: 'Job location',
@@ -63,20 +76,12 @@ export class JobPost {
   location: string;
 
   @ApiProperty({
-    description: 'Salary range',
-    example: '$80,000 - $120,000',
+    description: 'Salary amount',
+    example: 120000,
     required: false,
   })
-  @Column({ name: 'salary_range', nullable: true })
-  salaryRange?: string;
-
-  @ApiProperty({
-    description: 'Whether the job is remote',
-    example: true,
-    default: false,
-  })
-  @Column({ name: 'is_remote', default: false })
-  isRemote: boolean;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  salary?: number;
 
   @ApiProperty({
     description: 'Company ID',
@@ -90,15 +95,23 @@ export class JobPost {
   company: Company;
 
   @ApiProperty({
-    description: 'HR user ID who posted the job',
+    description: 'User ID who posted the job (HR or Company Owner)',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  @Column({ name: 'hr_id' })
-  hrId: string;
+  @Column({ name: 'created_by' })
+  createdBy: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'hr_id' })
-  hr: User;
+  @JoinColumn({ name: 'created_by' })
+  createdByUser: User;
+
+  @ApiProperty({
+    description: 'Whether the job post is active',
+    example: true,
+    default: true,
+  })
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
 
   @ApiProperty({
     description: 'When the job post was created',

@@ -18,7 +18,7 @@ export class JobPostHelper {
   ): Promise<JobPost> {
     const jobPost = await jobPostRepo.findOne({
       where: { id },
-      relations: ['company', 'hr'],
+      relations: ['company', 'createdByUser'],
     });
 
     if (!jobPost) {
@@ -75,16 +75,21 @@ export class JobPostHelper {
     companyRepo: Repository<Company>,
     userRepo: Repository<User>,
     createJobPostDto: CreateJobPostDto,
+    companyId: string,
+    createdBy: string,
   ): Promise<JobPost> {
     // Validate company exists
-    await this.validateCompany(companyRepo, createJobPostDto.companyId);
+    await this.validateCompany(companyRepo, companyId);
 
-    // Validate HR user if provided
-    if (createJobPostDto.companyHrId) {
-      await this.validateHRUser(userRepo, createJobPostDto.companyHrId);
-    }
+    // Validate user
+    await this.validateHRUser(userRepo, createdBy);
 
-    const jobPost = jobPostRepo.create(createJobPostDto);
+    const jobPost = jobPostRepo.create({
+      ...createJobPostDto,
+      companyId,
+      createdBy,
+      isActive: true,
+    });
     return jobPostRepo.save(jobPost);
   }
 
@@ -97,17 +102,19 @@ export class JobPostHelper {
     userRepo: Repository<User>,
     id: string,
     updateJobPostDto: UpdateJobPostDto,
+    companyId?: string,
+    userId?: string,
   ): Promise<JobPost> {
     const jobPost = await this.findJobPostById(jobPostRepo, id);
 
     // Validate company if being updated
-    if (updateJobPostDto.companyId) {
-      await this.validateCompany(companyRepo, updateJobPostDto.companyId);
+    if (companyId) {
+      await this.validateCompany(companyRepo, companyId);
     }
 
-    // Validate HR user if being updated
-    if (updateJobPostDto.companyHrId) {
-      await this.validateHRUser(userRepo, updateJobPostDto.companyHrId);
+    // Validate user if being updated
+    if (userId) {
+      await this.validateHRUser(userRepo, userId);
     }
 
     Object.assign(jobPost, updateJobPostDto);
@@ -134,20 +141,20 @@ export class JobPostHelper {
   ): Promise<JobPost[]> {
     return jobPostRepo.find({
       where: { companyId },
-      relations: ['company', 'hr'],
+      relations: ['company', 'createdByUser'],
     });
   }
 
   /**
-   * Get job posts by HR user
+   * Get job posts by user
    */
-  static async getJobPostsByHR(
+  static async getJobPostsByUser(
     jobPostRepo: Repository<JobPost>,
-    hrId: string,
+    userId: string,
   ): Promise<JobPost[]> {
     return jobPostRepo.find({
-      where: { hrId },
-      relations: ['company', 'hr'],
+      where: { createdBy: userId },
+      relations: ['company', 'createdByUser'],
     });
   }
 
@@ -155,21 +162,21 @@ export class JobPostHelper {
    * Check if job is remote
    */
   static isRemoteJob(jobPost: JobPost): boolean {
-    return jobPost.isRemote;
+    return jobPost.location?.toLowerCase().includes('remote') || false;
   }
 
   /**
    * Check if job type is full-time
    */
   static isFullTimeJob(jobPost: JobPost): boolean {
-    return jobPost.employmentType === JobType.FULL_TIME;
+    return jobPost.jobType === JobType.FULL_TIME;
   }
 
   /**
    * Format job post title
    */
   static getJobPostTitle(jobPost: JobPost): string {
-    const remote = jobPost.isRemote ? ' (Remote)' : '';
+    const remote = this.isRemoteJob(jobPost) ? ' (Remote)' : '';
     return `${jobPost.title}${remote}`;
   }
 
@@ -181,7 +188,7 @@ export class JobPostHelper {
     jobType: JobType,
   ): Promise<JobPost[]> {
     return jobPostRepo.find({
-      where: { employmentType: jobType },
+      where: { jobType: jobType },
       relations: ['company'],
     });
   }

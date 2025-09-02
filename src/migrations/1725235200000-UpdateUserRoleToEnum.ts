@@ -4,9 +4,13 @@ export class UpdateUserRoleToEnum1725235200000 implements MigrationInterface {
   name = 'UpdateUserRoleToEnum1725235200000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Create the enum type
+    // Create the enum type if it doesn't exist
     await queryRunner.query(
-      `CREATE TYPE "user_role_enum" AS ENUM('admin', 'hr', 'company_owner')`,
+      `DO $$ BEGIN
+        CREATE TYPE "user_role_enum" AS ENUM('admin', 'hr', 'company_owner');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;`,
     );
 
     // Update existing rows to have valid enum values
@@ -14,10 +18,18 @@ export class UpdateUserRoleToEnum1725235200000 implements MigrationInterface {
       `UPDATE "users" SET "role" = 'hr' WHERE "role" NOT IN ('admin', 'hr', 'company_owner')`,
     );
 
-    // Change the column type to use the enum
-    await queryRunner.query(
-      `ALTER TABLE "users" ALTER COLUMN "role" TYPE "user_role_enum" USING "role"::"user_role_enum"`,
+    // Check if column is already enum type
+    const result = await queryRunner.query(
+      `SELECT data_type FROM information_schema.columns 
+       WHERE table_name = 'users' AND column_name = 'role'`,
     );
+
+    // Only change column type if it's not already an enum
+    if (result[0]?.data_type !== 'USER-DEFINED') {
+      await queryRunner.query(
+        `ALTER TABLE "users" ALTER COLUMN "role" TYPE "user_role_enum" USING "role"::"user_role_enum"`,
+      );
+    }
 
     // Set default value
     await queryRunner.query(

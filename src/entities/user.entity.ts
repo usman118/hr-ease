@@ -1,4 +1,3 @@
-import { UserRole } from '@/enums/user.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
@@ -7,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserRole } from '../enums/user.enum';
 
 @Entity('users')
 export class User {
