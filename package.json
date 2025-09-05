@@ -30,10 +30,10 @@
     "db:restart": "docker compose restart",
     "dev": "npm run db:up && npm run start:dev",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "npm run typeorm -- -d src/data-source.ts migration:generate",
+    "migration:generate": "npm run typeorm -- -d src/database/database.config.ts migration:generate",
     "migration:create": "npx typeorm-ts-node-commonjs migration:create",
-    "migration:run": "npm run typeorm -- -d src/data-source.ts migration:run",
-    "migration:revert": "npm run typeorm -- -d src/data-source.ts migration:revert"
+    "migration:run": "npm run typeorm -- -d src/database/database.config.ts migration:run",
+    "migration:revert": "npm run typeorm -- -d src/database/database.config.ts migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
