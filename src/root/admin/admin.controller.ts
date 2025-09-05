@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '@/common/dto/pagination.dto';
 import { User } from '@/entities/user.entity';
 import {
   AssignCompanyDto,
@@ -14,11 +15,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 
+@ApiTags('Admin')
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
 export class AdminController {
@@ -29,12 +33,11 @@ export class AdminController {
   async createUser(
     @Body() createUserDto: CreateUserDto,
     @Req() req: RequestWithUser,
-  ): Promise<{ message: string; user: User; tempPassword?: string }> {
+  ): Promise<{ message: string; user: User }> {
     const result = await this.adminService.createUser(createUserDto, req.user);
     return {
       message: 'User created successfully',
       user: result.user,
-      tempPassword: result.tempPassword, // Include temp password for testing
     };
   }
 
@@ -70,14 +73,90 @@ export class AdminController {
 
   @Get('users')
   @UseGuards(AdminGuard)
-  async getAllUsers(@Req() _req: RequestWithUser): Promise<User[]> {
-    return await this.adminService.getAllUsers();
+  @ApiOperation({ summary: 'Get all users with pagination' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
+  @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
+  async getAllUsers(
+    @Req() _req: RequestWithUser,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<User>> {
+    const isLazy = lazy === 'true';
+    return await this.adminService.getAllUsers(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Get('companies')
   @UseGuards(AdminGuard)
-  async getAllCompanies(@Req() _req: RequestWithUser) {
-    return await this.adminService.getAllCompanies();
+  @ApiOperation({ summary: 'Get all companies with pagination' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
+  @ApiResponse({ status: 200, description: 'Companies retrieved successfully' })
+  async getAllCompanies(
+    @Req() _req: RequestWithUser,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<any>> {
+    const isLazy = lazy === 'true';
+    return await this.adminService.getAllCompanies(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Post('companies/:companyId/owners/:userId')

@@ -36,7 +36,7 @@ export class CompanyOwnerController {
   async createHrUser(
     @Body() createHrUserDto: CreateHrUserDto,
     @Req() req: RequestWithUser,
-  ): Promise<{ message: string; user: User; tempPassword?: string }> {
+  ): Promise<{ message: string; user: User }> {
     const result = await this.companyOwnerService.createHrUser(
       createHrUserDto,
       req.user,
@@ -44,7 +44,6 @@ export class CompanyOwnerController {
     return {
       message: 'HR user created successfully',
       user: result.user,
-      tempPassword: result.tempPassword, // Include temp password for testing
     };
   }
 

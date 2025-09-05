@@ -1,24 +1,27 @@
+import { PaginatedResponse } from '@/common/dto/pagination.dto';
+import { Visitor } from '@/entities/visitor.entity';
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Put,
+  Controller,
   Delete,
+  Get,
   Param,
   ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBody,
+  ApiOperation,
   ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
-import { VisitorsService } from './visitors.service';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { UpdateVisitorDto } from './dto/update-visitor.dto';
-import { Visitor } from '@/entities/visitor.entity';
+import { VisitorsService } from './visitors.service';
 
 @ApiTags('visitors')
 @Controller('visitors')
@@ -26,14 +29,48 @@ export class VisitorsController {
   constructor(private readonly visitorsService: VisitorsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all visitors' })
+  @ApiOperation({ summary: 'Get all visitors with pagination' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Returns all visitors',
-    type: [Visitor],
+    description: 'Returns paginated visitors',
   })
-  findAll(): Promise<Visitor[]> {
-    return this.visitorsService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<Visitor>> {
+    const isLazy = lazy === 'true';
+    return this.visitorsService.findAll(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Get(':id')

@@ -1,25 +1,28 @@
+import { PaginatedResponse } from '@/common/dto/pagination.dto';
+import { User } from '@/entities/user.entity';
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
   ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBody,
+  ApiOperation,
   ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
-import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { User } from '@/entities/user.entity';
+import { UsersService } from './users.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -27,25 +30,95 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all users' })
+  @ApiOperation({ summary: 'Get all users with pagination' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Returns all users',
-    type: [UserResponseDto],
+    description: 'Returns paginated users',
   })
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<User>> {
+    const isLazy = lazy === 'true';
+    return this.usersService.findAll(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Get('with-deleted')
-  @ApiOperation({ summary: 'Get all users including soft deleted ones' })
+  @ApiOperation({
+    summary: 'Get all users including soft deleted ones with pagination',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Returns all users including deleted ones',
-    type: [UserResponseDto],
+    description: 'Returns paginated users including deleted ones',
   })
-  findAllWithDeleted(): Promise<User[]> {
-    return this.usersService.findAllWithDeleted();
+  findAllWithDeleted(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<User>> {
+    const isLazy = lazy === 'true';
+    return this.usersService.findAllWithDeleted(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Get(':id')

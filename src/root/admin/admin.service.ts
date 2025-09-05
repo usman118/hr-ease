@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '@/common/dto/pagination.dto';
 import { CompanyHr } from '@/entities/company-hr.entity';
 import { Company } from '@/entities/company.entity';
 import { User } from '@/entities/user.entity';
@@ -190,43 +191,131 @@ export class AdminService {
     }
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.userRepo.find({
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'role',
-        'isActive',
-        'createdAt',
-      ],
-      order: { createdAt: 'DESC' },
-    });
+  async getAllUsers(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    lazy: boolean = false,
+  ): Promise<PaginatedResponse<User>> {
+    const queryBuilder = this.userRepo
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+        'user.role',
+        'user.isActive',
+        'user.createdAt',
+      ])
+      .orderBy('user.createdAt', 'DESC');
+
+    // Apply search filter
+    if (search) {
+      queryBuilder.where(
+        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // If lazy loading is enabled, return all records without pagination
+    if (lazy) {
+      const users = await queryBuilder.getMany();
+      return {
+        data: users,
+        total: users.length,
+        page: 1,
+        limit: users.length,
+        totalPages: 1,
+        hasNext: false,
+        hasPrevious: false,
+      };
+    }
+
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
+
+    const [users, total] = await queryBuilder.getManyAndCount();
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: users,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
   }
 
-  async getAllCompanies() {
-    return await this.companyRepo.find({
-      relations: ['owner'],
-      select: {
-        id: true,
-        name: true,
-        industry: true,
-        website: true,
-        description: true,
-        address: true,
-        city: true,
-        country: true,
-        createdAt: true,
-        owner: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-        },
-      },
-      order: { createdAt: 'DESC' },
-    });
+  async getAllCompanies(
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    lazy: boolean = false,
+  ): Promise<PaginatedResponse<Company>> {
+    const queryBuilder = this.companyRepo
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.owner', 'owner')
+      .select([
+        'company.id',
+        'company.name',
+        'company.industry',
+        'company.website',
+        'company.description',
+        'company.address',
+        'company.city',
+        'company.country',
+        'company.createdAt',
+        'owner.id',
+        'owner.firstName',
+        'owner.lastName',
+        'owner.email',
+      ])
+      .orderBy('company.createdAt', 'DESC');
+
+    // Apply search filter
+    if (search) {
+      queryBuilder.where(
+        '(company.name ILIKE :search OR company.industry ILIKE :search OR company.city ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // If lazy loading is enabled, return all records without pagination
+    if (lazy) {
+      const companies = await queryBuilder.getMany();
+      return {
+        data: companies,
+        total: companies.length,
+        page: 1,
+        limit: companies.length,
+        totalPages: 1,
+        hasNext: false,
+        hasPrevious: false,
+      };
+    }
+
+    // Apply pagination
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
+
+    const [companies, total] = await queryBuilder.getManyAndCount();
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: companies,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
   }
 
   async assignCompanyOwner(

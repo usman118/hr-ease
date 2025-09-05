@@ -98,49 +98,12 @@ export class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
-      // In development, redirect all emails to theusmanofficial@gmail.com
-      const isDevelopment = process.env.NODE_ENV !== 'production';
-      const originalTo = options.to;
-      const actualTo = isDevelopment
-        ? 'theusmanofficial@gmail.com'
-        : options.to;
-
-      // If redirecting email in development, modify subject and content to include original recipient info
-      let modifiedSubject = options.subject;
-      let modifiedText = options.text;
-      let modifiedHtml = options.html;
-
-      if (isDevelopment && originalTo !== actualTo) {
-        modifiedSubject = `[DEV - Originally to: ${originalTo}] ${options.subject}`;
-
-        if (options.text) {
-          modifiedText = `[DEVELOPMENT EMAIL REDIRECT]\nOriginal Recipient: ${originalTo}\nActual Recipient: ${actualTo}\n\n--- Original Email ---\n\n${options.text}`;
-        }
-
-        if (options.html) {
-          modifiedHtml = `
-            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
-              <strong>🚨 DEVELOPMENT EMAIL REDIRECT</strong><br>
-              <strong>Original Recipient:</strong> ${originalTo}<br>
-              <strong>Actual Recipient:</strong> ${actualTo}<br>
-              <em>This email was redirected because the application is running in development mode.</em>
-            </div>
-            <hr>
-            ${options.html}
-          `;
-        }
-
-        this.logger.log(
-          `Email redirected in development: ${originalTo} → ${actualTo}`,
-        );
-      }
-
       const mailOptions = {
         from: process.env.EMAIL_FROM || '"HR Ease" <noreply@hrease.com>',
-        to: actualTo,
-        subject: modifiedSubject,
-        text: modifiedText,
-        html: modifiedHtml,
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
       };
 
       const result = await this.transporter.sendMail(mailOptions);
@@ -153,13 +116,7 @@ export class EmailService {
         }
       }
 
-      if (isDevelopment && originalTo !== actualTo) {
-        this.logger.log(
-          `Email sent successfully to ${actualTo} (redirected from ${originalTo})`,
-        );
-      } else {
-        this.logger.log(`Email sent successfully to ${options.to}`);
-      }
+      this.logger.log(`Email sent successfully to ${options.to}`);
 
       return true;
     } catch (error) {

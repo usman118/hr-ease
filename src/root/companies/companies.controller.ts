@@ -1,24 +1,27 @@
+import { PaginatedResponse } from '@/common/dto/pagination.dto';
+import { Company } from '@/entities/company.entity';
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
   Body,
+  Controller,
+  Delete,
+  Get,
   Param,
   ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBody,
+  ApiOperation,
   ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Company } from '@/entities/company.entity';
 
 @ApiTags('companies')
 @Controller('companies')
@@ -26,14 +29,48 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all companies' })
+  @ApiOperation({ summary: 'Get all companies with pagination' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search term',
+  })
+  @ApiQuery({
+    name: 'lazy',
+    required: false,
+    type: Boolean,
+    description: 'Load all records at once (ignores pagination)',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Returns all companies',
-    type: [Company],
+    description: 'Returns paginated companies',
   })
-  findAll(): Promise<Company[]> {
-    return this.companiesService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('lazy') lazy?: string,
+  ): Promise<PaginatedResponse<Company>> {
+    const isLazy = lazy === 'true';
+    return this.companiesService.findAll(
+      page ? parseInt(page) : 1,
+      limit ? parseInt(limit) : 10,
+      search,
+      isLazy,
+    );
   }
 
   @Get(':id')

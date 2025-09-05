@@ -4,9 +4,30 @@ A NestJS-based backend application for HR management system with PostgreSQL data
 
 ## Project Structure
 
-# HR Ease Backend
+# 🏢 HR Ease Backend
 
-A comprehensive NestJS-based backend application for HR management system with role-based authentication, job management, and application tracking using PostgreSQL database.
+> A comprehensive Human Resources Management System backend built with NestJS, featuring role-based authentication, job management, and application tracking.
+
+[![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?style=flat&logo=nestjs)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.x-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
+[![Jest](https://img.shields.io/badge/Jest-Testing-C21325?style=flat&logo=jest)](https://jestjs.io/)
+
+## 📋 Table of Contents
+
+- [🎯 Project Overview](#-project-overview)
+- [✨ Key Features](#-key-features)
+- [🏗️ Architecture](#️-architecture)
+- [🚀 Quick Start](#-quick-start)
+- [📁 Project Structure](#-project-structure)
+- [🔐 Authentication & Security](#-authentication--security)
+- [📊 Database Design](#-database-design)
+- [🌐 API Documentation](#-api-documentation)
+- [🧪 Testing](#-testing)
+- [📧 Email Integration](#-email-integration)
+- [🔧 Configuration](#-configuration)
+- [🎯 Development Status](#-development-status)
+- [🤝 Contributing](#-contributing)
 
 ## 🚀 Features
 
@@ -124,8 +145,10 @@ DB_NAME=hr_ease
 # JWT Configuration
 JWT_SECRET=your_jwt_secret_key
 
-# Email Configuration (Development)
-DEVELOPMENT_EMAIL_REDIRECT=theusmanofficial@gmail.com
+# Email Configuration
+EMAIL_USER=your-email@gmail.com
+GOOGLE_APP_PASSWORD=your-16-character-app-password
+EMAIL_FROM="HR Ease" <your-email@gmail.com>
 
 # Application Configuration
 NODE_ENV=development
@@ -169,50 +192,113 @@ $ npm run test:cov           # Run tests with coverage
 
 ## 🔗 API Endpoints
 
-### Authentication
+### Authentication (`/api/v1/auth`)
 
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/forgot-password` - Request password reset
-- `POST /api/v1/auth/reset-password` - Reset password with token
+- `POST /api/v1/auth/signup` - User registration
+- `POST /api/v1/auth/login` - User authentication
+- `POST /api/v1/auth/forgot-password` - Password reset request
+- `POST /api/v1/auth/reset-password` - Password reset with token
+- `PATCH /api/v1/auth/update-password` - Change user password
 
-### Admin Management
+### Admin Management (`/api/v1/admin`)
 
-- `POST /api/v1/admin/create-company-owner` - Create company owner
-- `GET /api/v1/admin/users` - Get all users (paginated)
-- `PUT /api/v1/admin/users/:id/status` - Update user status
+- `POST /api/v1/admin/users` - Create any type of user
+- `POST /api/v1/admin/users/invite` - Invite user via email
+- `PUT /api/v1/admin/users/:userId/assign-company` - Assign company to user
+- `GET /api/v1/admin/users` - Get all users (with pagination & search)
+- `GET /api/v1/admin/companies` - Get all companies (with pagination & search)
+- `POST /api/v1/admin/companies/:companyId/owners/:userId` - Assign company owner
 
-### Company Management
+### Company Management (`/api/v1/companies`)
 
-- `POST /api/v1/companies` - Create company
-- `GET /api/v1/companies` - Get companies (role-based)
+- `GET /api/v1/companies` - Get all companies (with pagination & search)
 - `GET /api/v1/companies/:id` - Get company by ID
+- `POST /api/v1/companies` - Create company
 - `PUT /api/v1/companies/:id` - Update company
 - `DELETE /api/v1/companies/:id` - Delete company
-- `POST /api/v1/companies/:id/assign-owner` - Assign owner to company
 
-### Job Posts Management
+### Company Owner Management (`/api/v1/company-owner`)
 
-- `POST /api/v1/job-posts` - Create job post (HR/Owner)
-- `GET /api/v1/job-posts` - Get job posts (public & role-based)
+- `POST /api/v1/company-owner/hr-users` - Create HR user for company
+- `POST /api/v1/company-owner/hr-users/invite` - Invite HR user via email
+- `GET /api/v1/company-owner/hr-users` - Get company's HR users
+- `GET /api/v1/company-owner/company` - Get company information
+- `GET /api/v1/company-owner/stats` - Get company statistics
+- `DELETE /api/v1/company-owner/hr-users/:hrUserId` - Remove HR user
+
+### Job Posts Management (`/api/v1/job-posts`)
+
+- `GET /api/v1/job-posts` - Get all job posts (public with pagination/search)
+- `GET /api/v1/job-posts/my-posts` - Get current user's job posts
+- `GET /api/v1/job-posts/statistics/overview` - Get job post statistics
 - `GET /api/v1/job-posts/:id` - Get job post by ID
-- `PUT /api/v1/job-posts/:id` - Update job post (HR/Owner)
-- `DELETE /api/v1/job-posts/:id` - Delete job post (HR/Owner)
+- `POST /api/v1/job-posts` - Create job post
+- `PUT /api/v1/job-posts/:id` - Update job post
+- `DELETE /api/v1/job-posts/:id` - Delete job post
+- `PATCH /api/v1/job-posts/:id/toggle-status` - Toggle job post status
 
-### Job Applications
+### Job Applications (`/api/v1/job-applications`)
 
 - `POST /api/v1/job-applications/apply/:jobId` - Apply for job (public)
-- `GET /api/v1/job-applications/my-applications` - Get applications (HR/Owner)
-- `GET /api/v1/job-applications/:id` - Get application by ID (HR/Owner)
-- `PUT /api/v1/job-applications/:id/status` - Update application status (HR/Owner)
-- `GET /api/v1/job-applications/statistics` - Get application statistics (HR/Owner)
+- `GET /api/v1/job-applications/my-applications` - Get applications for user's company
+- `GET /api/v1/job-applications/job/:jobId` - Get applications for specific job
+- `GET /api/v1/job-applications/statistics` - Get application statistics
+- `GET /api/v1/job-applications/:id` - Get application by ID
+- `PUT /api/v1/job-applications/:id/status` - Update application status
 
-### Users Management
+### User Management (`/api/v1/users`)
 
-- `POST /api/v1/users/create-hr` - Create HR user (Owner)
-- `GET /api/v1/users` - Get users
+- `GET /api/v1/users` - Get all users (with pagination & search)
+- `GET /api/v1/users/with-deleted` - Get all users including soft deleted (with pagination & search)
+- `GET /api/v1/users/:id` - Get user by ID
+- `POST /api/v1/users` - Create user
 - `PUT /api/v1/users/:id` - Update user
 - `DELETE /api/v1/users/:id` - Delete user
+- `PUT /api/v1/users/:id/deactivate` - Soft delete user
+- `PUT /api/v1/users/:id/restore` - Restore soft deleted user
+
+### Profile Management (`/api/v1/profile`)
+
+- `GET /api/v1/profile/me` - Get current user profile
+- `GET /api/v1/profile/admin-only` - Admin-only test endpoint
+- `GET /api/v1/profile/hr-or-admin` - HR or Admin test endpoint
+
+### Visitor Management (`/api/v1/visitors`)
+
+- `GET /api/v1/visitors` - Get all visitors (with pagination & search)
+- `GET /api/v1/visitors/:id` - Get visitor by ID
+- `POST /api/v1/visitors` - Create visitor
+- `PUT /api/v1/visitors/:id` - Update visitor
+- `DELETE /api/v1/visitors/:id` - Delete visitor
+
+### 📊 Pagination Support
+
+All "Get All" endpoints now support pagination with the following query parameters:
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10, max: 100)
+- `search` (optional): Search term to filter results
+- `lazy` (optional): Load all records at once (default: false)
+
+**Standard Pagination**: `GET /api/v1/users?page=2&limit=20&search=john`
+
+**Lazy Loading (All Records)**: `GET /api/v1/users?lazy=true&search=john`
+
+**Response Format**:
+
+```json
+{
+  "data": [...],
+  "total": 150,
+  "page": 2,
+  "limit": 20,
+  "totalPages": 8,
+  "hasNext": true,
+  "hasPrevious": true
+}
+```
+
+**Note**: When `lazy=true`, pagination parameters are ignored and all matching records are returned. Use with caution for large datasets.
 
 ## 🔐 Authentication & Authorization
 
