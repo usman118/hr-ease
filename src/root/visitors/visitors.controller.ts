@@ -27,7 +27,7 @@ import { UpdateVisitorDto } from './dto/update-visitor.dto';
 import { VisitorsService } from './visitors.service';
 
 @ApiTags('visitors')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('visitors')
 @UseGuards(JwtAuthGuard)
 export class VisitorsController {

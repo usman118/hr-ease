@@ -1,5 +1,4 @@
 import { User } from '@/entities/user.entity';
-import { CompanyOwnerGuard } from '@/root/auth/guards/company-owner.guard';
 import { JwtAuthGuard } from '@/root/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from '@/types/request.interface';
 import {
@@ -21,10 +20,10 @@ import {
 import { CompanyOwnerService } from './company-owner.service';
 import { CreateHrUserDto, InviteHrUserDto } from './dto/company-owner.dto';
 
-@ApiTags('Company Owner')
-@ApiBearerAuth()
+@ApiTags('company-owner')
+@ApiBearerAuth('JWT-auth')
 @Controller('company-owner')
-@UseGuards(JwtAuthGuard, CompanyOwnerGuard)
+@UseGuards(JwtAuthGuard)
 export class CompanyOwnerController {
   constructor(private readonly companyOwnerService: CompanyOwnerService) {}
 

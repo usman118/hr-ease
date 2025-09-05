@@ -224,11 +224,6 @@ export class AdminService {
       return {
         data: users,
         total: users.length,
-        page: 1,
-        limit: users.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 
@@ -291,11 +286,6 @@ export class AdminService {
       return {
         data: companies,
         total: companies.length,
-        page: 1,
-        limit: companies.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 

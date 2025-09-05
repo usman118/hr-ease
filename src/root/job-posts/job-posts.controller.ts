@@ -66,7 +66,7 @@ export class JobPostsController {
   @ApiOperation({
     summary: 'Get job posts created by current user (HR/Company Owner)',
   })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -98,7 +98,7 @@ export class JobPostsController {
 
   @Get('statistics/overview')
   @ApiOperation({ summary: 'Get job post statistics for current user' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({
     status: 200,
     description: 'Job post statistics retrieved successfully',
@@ -137,7 +137,7 @@ export class JobPostsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new job post' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiBody({ type: CreateJobPostDto })
   @ApiResponse({
     status: 201,
@@ -162,7 +162,7 @@ export class JobPostsController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update job post by ID' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiParam({ name: 'id', type: 'string', description: 'Job Post UUID' })
   @ApiBody({ type: UpdateJobPostDto })
   @ApiResponse({
@@ -191,7 +191,7 @@ export class JobPostsController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete job post by ID' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiParam({ name: 'id', type: 'string', description: 'Job Post UUID' })
   @ApiResponse({ status: 200, description: 'Job post deleted successfully' })
   @ApiResponse({ status: 404, description: 'Job post not found' })
@@ -206,7 +206,7 @@ export class JobPostsController {
 
   @Patch(':id/toggle-status')
   @ApiOperation({ summary: 'Toggle job post status (active/inactive)' })
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiParam({ name: 'id', type: 'string', description: 'Job Post UUID' })
   @ApiResponse({
     status: 200,

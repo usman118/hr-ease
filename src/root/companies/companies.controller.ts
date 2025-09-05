@@ -27,7 +27,7 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @ApiTags('companies')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('companies')
 @UseGuards(JwtAuthGuard)
 export class CompaniesController {

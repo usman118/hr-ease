@@ -55,9 +55,50 @@ export class PaginationDto {
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  hasNext?: boolean;
+  hasPrevious?: boolean;
+}
+
+export interface LazyResponse<T> {
+  data: T[];
+  total: number;
+}
+
+export type ApiResponse<T> = PaginatedResponse<T> | LazyResponse<T>;
+
+export class PaginationHelper {
+  /**
+   * Create a lazy response (no pagination metadata)
+   */
+  static createLazyResponse<T>(data: T[]): LazyResponse<T> {
+    return {
+      data,
+      total: data.length,
+    };
+  }
+
+  /**
+   * Create a paginated response with metadata
+   */
+  static createPaginatedResponse<T>(
+    data: T[],
+    total: number,
+    page: number,
+    limit: number,
+  ): PaginatedResponse<T> {
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
+  }
 }

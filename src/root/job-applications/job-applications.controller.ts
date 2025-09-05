@@ -52,7 +52,7 @@ export class JobApplicationsController {
 
   @Get('my-applications')
   @UseGuards(JwtAuthGuard, HrOrAdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get all applications for my company (HR/Owner)' })
   @ApiResponse({
     status: 200,
@@ -68,7 +68,7 @@ export class JobApplicationsController {
 
   @Get('job/:jobId')
   @UseGuards(JwtAuthGuard, HrOrAdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get applications for a specific job (HR/Owner)' })
   @ApiParam({ name: 'jobId', type: 'string', description: 'Job Post UUID' })
   @ApiResponse({
@@ -90,7 +90,7 @@ export class JobApplicationsController {
 
   @Get('statistics')
   @UseGuards(JwtAuthGuard, HrOrAdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: 'Get application statistics for my company (HR/Owner)',
   })
@@ -112,7 +112,7 @@ export class JobApplicationsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, HrOrAdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get job application by ID (HR/Owner)' })
   @ApiParam({ name: 'id', type: 'string', description: 'Job Application UUID' })
   @ApiResponse({
@@ -131,7 +131,7 @@ export class JobApplicationsController {
 
   @Put(':id/status')
   @UseGuards(JwtAuthGuard, HrOrAdminGuard)
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update application status (HR/Owner)' })
   @ApiParam({ name: 'id', type: 'string', description: 'Job Application UUID' })
   @ApiBody({ type: UpdateApplicationStatusDto })

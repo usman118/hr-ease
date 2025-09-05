@@ -45,11 +45,6 @@ export class VisitorsService {
       return {
         data: visitors,
         total: visitors.length,
-        page: 1,
-        limit: visitors.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 

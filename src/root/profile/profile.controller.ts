@@ -3,10 +3,10 @@ import { GetUser, JwtAuthGuard, Roles } from '@/root/auth';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Profile')
+@ApiTags('profile')
+@ApiBearerAuth('JWT-auth')
 @Controller('profile')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class ProfileController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })

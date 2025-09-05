@@ -35,11 +35,6 @@ export class UsersService {
       return {
         data: users,
         total: users.length,
-        page: 1,
-        limit: users.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 
@@ -88,11 +83,6 @@ export class UsersService {
       return {
         data: users,
         total: users.length,
-        page: 1,
-        limit: users.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 
@@ -147,11 +137,6 @@ export class UsersService {
       return {
         data: users,
         total: users.length,
-        page: 1,
-        limit: users.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
       };
     }
 
