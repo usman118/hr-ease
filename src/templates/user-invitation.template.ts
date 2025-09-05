@@ -4,8 +4,8 @@ export interface UserInvitationTemplateData {
   email: string;
   role: string;
   companyName?: string;
-  temporaryPassword: string;
-  loginUrl: string;
+  invitationToken: string;
+  invitationUrl: string;
   invitedBy: string;
 }
 
@@ -105,22 +105,21 @@ export class UserInvitationTemplate {
             }
             
             <div class="credentials-box">
-              <h3>🔐 Your Login Credentials</h3>
+              <h3>� Complete Your Account Setup</h3>
               <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Temporary Password:</strong> <code>${data.temporaryPassword}</code></p>
-              <p><em>⚠️ Please change your password after your first login for security.</em></p>
+              <p>Click the button below to set up your password and activate your account:</p>
             </div>
             
-            <p>Click the button below to access your account:</p>
-            <a href="${data.loginUrl}" class="button">Login to HR Ease</a>
+            <p>Click the button below to complete your account setup:</p>
+            <a href="${data.invitationUrl}" class="button">Set Up My Account</a>
             
             <p>Or copy and paste this link in your browser:</p>
-            <p><a href="${data.loginUrl}">${data.loginUrl}</a></p>
+            <p><a href="${data.invitationUrl}">${data.invitationUrl}</a></p>
             
             <h3>🚀 What's Next?</h3>
             <ul>
-              <li>Login with your temporary credentials</li>
-              <li>Change your password immediately</li>
+              <li>Click the invitation link above</li>
+              <li>Set up your secure password</li>
               <li>Complete your profile information</li>
               <li>Start exploring HR Ease features</li>
             </ul>
@@ -149,17 +148,15 @@ You have been invited to join HR Ease as a ${data.role.replace('_', ' ').toUpper
 
 ${data.companyName ? `Company: ${data.companyName}` : ''}
 
-🔐 Your Login Credentials:
+� Complete Your Account Setup:
 Email: ${data.email}
-Temporary Password: ${data.temporaryPassword}
 
-⚠️ Please change your password after your first login for security.
-
-Login URL: ${data.loginUrl}
+Click the link below to set up your password and activate your account:
+${data.invitationUrl}
 
 🚀 What's Next?
-- Login with your temporary credentials
-- Change your password immediately  
+- Click the invitation link above
+- Set up your secure password
 - Complete your profile information
 - Start exploring HR Ease features
 

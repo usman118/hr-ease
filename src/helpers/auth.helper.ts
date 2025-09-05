@@ -105,6 +105,11 @@ export class AuthHelper {
     if (!user.isActive) {
       throw new UnauthorizedException('Account is deactivated');
     }
+    if (!user.password) {
+      throw new UnauthorizedException(
+        'Account setup not completed. Please check your invitation email.',
+      );
+    }
     const isPasswordValid = await this.comparePassword(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -157,6 +162,12 @@ export class AuthHelper {
     const user = await userRepo.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    if (!user.password) {
+      throw new BadRequestException(
+        'Account setup not completed. Please complete your invitation first.',
+      );
     }
 
     // Verify old password

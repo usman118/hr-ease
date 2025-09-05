@@ -19,14 +19,31 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 
 @ApiTags('Admin')
+@ApiBearerAuth('JWT-auth')
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  @Get('debug/whoami')
+  @ApiOperation({ summary: 'Debug: Check current admin user info' })
+  async whoAmI(@Req() req: RequestWithUser): Promise<any> {
+    return {
+      message: 'Token is valid',
+      user: req.user,
+      timestamp: new Date().toISOString(),
+    };
+  }
 
   @Post('users')
   @UseGuards(AdminGuard)
@@ -46,11 +63,12 @@ export class AdminController {
   async inviteUser(
     @Body() inviteUserDto: InviteUserDto,
     @Req() req: RequestWithUser,
-  ): Promise<{ message: string; user: User }> {
+  ): Promise<{ message: string; user: User; invitationToken: string }> {
     const result = await this.adminService.inviteUser(inviteUserDto, req.user);
     return {
       message: 'User invited successfully. Invitation email has been sent.',
-      user: result,
+      user: result.user,
+      invitationToken: result.invitationToken,
     };
   }
 

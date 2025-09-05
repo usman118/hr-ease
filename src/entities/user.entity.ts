@@ -28,8 +28,30 @@ export class User {
     description: 'User password',
     example: 'password123',
   })
-  @Column()
-  password: string;
+  @Column({ nullable: true })
+  password?: string;
+
+  @ApiProperty({
+    description: 'Invitation token for account setup',
+    required: false,
+  })
+  @Column({ name: 'invitation_token', nullable: true })
+  invitationToken?: string;
+
+  @ApiProperty({
+    description: 'When invitation token expires',
+    required: false,
+  })
+  @Column({ name: 'invitation_expires_at', nullable: true })
+  invitationExpiresAt?: Date;
+
+  @ApiProperty({
+    description: 'Whether user has accepted invitation and set password',
+    example: false,
+    default: false,
+  })
+  @Column({ name: 'invitation_accepted', default: false })
+  invitationAccepted: boolean;
 
   @ApiProperty({
     description: 'User role',

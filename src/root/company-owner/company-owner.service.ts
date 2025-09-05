@@ -34,7 +34,7 @@ export class CompanyOwnerService {
   async createHrUser(
     createHrUserDto: CreateHrUserDto,
     companyOwner: User,
-  ): Promise<{ user: User; tempPassword: string }> {
+  ): Promise<{ user: User; invitationToken: string }> {
     const { email, firstName, lastName } = createHrUserDto;
 
     // Get the company this owner manages
@@ -48,21 +48,21 @@ export class CompanyOwnerService {
     // Check if email is already in use
     await AuthHelper.checkEmailAvailability(this.userRepo, email);
 
-    // Generate temporary password
-    const temporaryPassword = AuthHelper.generateRandomToken(12);
-    const hashedPassword = await AuthHelper.hashPassword(temporaryPassword);
+    // Generate invitation token
+    const invitationToken = AuthHelper.generateRandomToken(32);
+    const invitationExpiresAt = new Date();
+    invitationExpiresAt.setHours(invitationExpiresAt.getHours() + 24); // 24 hours expiry
 
-    // Log temporary password for testing
-    this.logger.log(`HR temporary password for ${email}: ${temporaryPassword}`);
-
-    // Create HR user
+    // Create HR user with invitation
     const hrUser = this.userRepo.create({
       email,
       firstName,
       lastName,
       role: UserRole.HR,
-      password: hashedPassword,
-      isActive: true,
+      isActive: false, // Will be activated when invitation is accepted
+      invitationToken,
+      invitationExpiresAt,
+      invitationAccepted: false,
     });
 
     const savedUser = await this.userRepo.save(hrUser);
@@ -76,7 +76,7 @@ export class CompanyOwnerService {
 
     return {
       user: savedUser,
-      tempPassword: temporaryPassword,
+      invitationToken,
     };
   }
 
@@ -86,14 +86,14 @@ export class CompanyOwnerService {
   ): Promise<User> {
     const { email, firstName, lastName } = inviteHrUserDto;
 
-    // Create the HR user first and get the temporary password
+    // Create the HR user first and get the invitation token
     const result = await this.createHrUser(
       { email, firstName, lastName },
       companyOwner,
     );
 
     const hrUser = result.user;
-    const temporaryPassword = result.tempPassword;
+    const invitationToken = result.invitationToken;
 
     // Get company information for email
     const company = await this.getMyCompany(companyOwner.id);
@@ -106,8 +106,8 @@ export class CompanyOwnerService {
         email: hrUser.email,
         role: hrUser.role,
         companyName: company?.name,
-        temporaryPassword,
-        loginUrl: `${process.env.FRONTEND_URL}/auth/login`,
+        invitationToken,
+        invitationUrl: `${process.env.FRONTEND_URL}/auth/accept-invitation?token=${invitationToken}`,
         invitedBy: `${companyOwner.firstName} ${companyOwner.lastName} (${company?.name})`,
       };
 

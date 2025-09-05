@@ -2,12 +2,13 @@ import { User } from '@/entities/user.entity';
 import { UserRole } from '@/enums/user.enum';
 import { AuthHelper, UserHelper } from '@/helpers';
 import { ForgotPasswordDto } from '@/root/auth/dto/forgot-password.dto';
+import { AcceptInvitationDto } from '@/root/auth/dto/invitation.dto';
 import { LoginDto } from '@/root/auth/dto/login.dto';
 import { ResetPasswordDto } from '@/root/auth/dto/reset-password.dto';
 import { SignupDto } from '@/root/auth/dto/signup.dto';
 import { UpdatePasswordDto } from '@/root/auth/dto/update-password.dto';
 import { EmailService } from '@/services/email.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -165,5 +166,85 @@ export class AuthService {
     return {
       message: 'Password updated successfully',
     };
+  }
+
+  /**
+   * Validate invitation token
+   */
+  async validateInvitation(token: string) {
+    const user = await this.userRepo.findOne({
+      where: { invitationToken: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid invitation token');
+    }
+
+    if (!user.invitationExpiresAt || user.invitationExpiresAt < new Date()) {
+      throw new BadRequestException('Invitation token has expired');
+    }
+
+    if (user.invitationAccepted) {
+      throw new BadRequestException('Invitation has already been accepted');
+    }
+
+    return {
+      message: 'Invitation token is valid',
+      user: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+    };
+  }
+
+  /**
+   * Accept invitation and set password
+   */
+  async acceptInvitation(dto: AcceptInvitationDto) {
+    const { token, password, confirmPassword } = dto;
+
+    // Validate that passwords match
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    // Find user by invitation token
+    const user = await this.userRepo.findOne({
+      where: { invitationToken: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid invitation token');
+    }
+
+    if (!user.invitationExpiresAt || user.invitationExpiresAt < new Date()) {
+      throw new BadRequestException('Invitation token has expired');
+    }
+
+    if (user.invitationAccepted) {
+      throw new BadRequestException('Invitation has already been accepted');
+    }
+
+    // Hash the new password
+    const hashedPassword = await AuthHelper.hashPassword(password);
+
+    // Update user: set password, activate account, clear invitation data
+    user.password = hashedPassword;
+    user.isActive = true;
+    user.invitationAccepted = true;
+    user.invitationToken = undefined;
+    user.invitationExpiresAt = undefined;
+
+    const savedUser = await this.userRepo.save(user);
+
+    // Generate JWT token for immediate login
+    const accessToken = AuthHelper.generateAccessToken(
+      this.jwtService,
+      savedUser,
+    );
+
+    return AuthHelper.formatAuthResponse(savedUser, accessToken);
   }
 }

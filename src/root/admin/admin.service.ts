@@ -68,24 +68,27 @@ export class AdminService {
   async inviteUser(
     inviteUserDto: InviteUserDto,
     adminUser: User,
-  ): Promise<User> {
+  ): Promise<{ user: User; invitationToken: string }> {
     const { email, firstName, lastName, role, companyId } = inviteUserDto;
 
     // Check if email is already in use
     await AuthHelper.checkEmailAvailability(this.userRepo, email);
 
-    // Generate temporary password
-    const temporaryPassword = AuthHelper.generateRandomToken(12);
-    const hashedPassword = await AuthHelper.hashPassword(temporaryPassword);
+    // Generate invitation token (valid for 7 days)
+    const invitationToken = AuthHelper.generateRandomToken(32);
+    const invitationExpiresAt = new Date();
+    invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7); // 7 days from now
 
-    // Create user
+    // Create user without password (inactive until invitation is accepted)
     const user = this.userRepo.create({
       email,
       firstName,
       lastName,
       role,
-      password: hashedPassword,
-      isActive: true,
+      invitationToken,
+      invitationExpiresAt,
+      invitationAccepted: false,
+      isActive: false, // User is inactive until they accept invitation
     });
 
     const savedUser = await this.userRepo.save(user);
@@ -126,8 +129,8 @@ export class AdminService {
         email: savedUser.email,
         role: savedUser.role,
         companyName: companyName || undefined,
-        temporaryPassword,
-        loginUrl: `${process.env.FRONTEND_URL}/auth/login`,
+        invitationToken,
+        invitationUrl: `${process.env.FRONTEND_URL}/auth/accept-invitation?token=${invitationToken}`,
         invitedBy: `${adminUser.firstName} ${adminUser.lastName}`,
       };
 
@@ -142,7 +145,10 @@ export class AdminService {
       // Don't fail the user creation if email fails
     }
 
-    return savedUser;
+    return {
+      user: savedUser,
+      invitationToken,
+    };
   }
 
   async assignCompanyToUser(

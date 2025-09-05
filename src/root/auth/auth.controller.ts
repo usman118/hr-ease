@@ -2,12 +2,21 @@ import { AuthService } from '@/root/auth/auth.service';
 import { GetUser } from '@/root/auth/decorators/get-user.decorator';
 import { AuthResponseDto } from '@/root/auth/dto/auth-response.dto';
 import { ForgotPasswordDto } from '@/root/auth/dto/forgot-password.dto';
+import { AcceptInvitationDto } from '@/root/auth/dto/invitation.dto';
 import { LoginDto } from '@/root/auth/dto/login.dto';
 import { ResetPasswordDto } from '@/root/auth/dto/reset-password.dto';
 import { SignupDto } from '@/root/auth/dto/signup.dto';
 import { UpdatePasswordDto } from '@/root/auth/dto/update-password.dto';
 import { JwtAuthGuard } from '@/root/auth/guards/jwt-auth.guard';
-import { Body, Controller, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -69,5 +78,24 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   updatePassword(@GetUser() user: any, @Body() dto: UpdatePasswordDto) {
     return this.authService.updatePassword(user.id, dto);
+  }
+
+  @Get('validate-invitation/:token')
+  @ApiOperation({ summary: 'Validate invitation token' })
+  @ApiResponse({ status: 200, description: 'Invitation token is valid' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  validateInvitation(@Param('token') token: string) {
+    return this.authService.validateInvitation(token);
+  }
+
+  @Post('accept-invitation')
+  @ApiOperation({ summary: 'Accept invitation and set password' })
+  @ApiResponse({ status: 200, description: 'Account activated successfully' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid token or passwords do not match',
+  })
+  acceptInvitation(@Body() dto: AcceptInvitationDto) {
+    return this.authService.acceptInvitation(dto);
   }
 }
