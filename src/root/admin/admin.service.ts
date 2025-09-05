@@ -127,7 +127,7 @@ export class AdminService {
         role: savedUser.role,
         companyName: companyName || undefined,
         temporaryPassword,
-        loginUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login`,
+        loginUrl: `${process.env.FRONTEND_URL}/auth/login`,
         invitedBy: `${adminUser.firstName} ${adminUser.lastName}`,
       };
 

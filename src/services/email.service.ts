@@ -131,7 +131,7 @@ export class EmailService {
   ): Promise<boolean> {
     const resetUrl =
       data.resetUrl ||
-      `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${data.resetToken}`;
+      `${process.env.FRONTEND_URL}/reset-password?token=${data.resetToken}`;
 
     const templateData: PasswordResetTemplateData = {
       firstName: data.firstName,
