@@ -209,7 +209,7 @@ $ npm run test:cov           # Run tests with coverage
 - `GET /api/v1/admin/companies` - Get all companies (with pagination & search)
 - `POST /api/v1/admin/companies/:companyId/owners/:userId` - Assign company owner
 
-### Company Management (`/api/v1/companies`)
+### Company Management (`/api/v1/companies`) 🔒 **Secured**
 
 - `GET /api/v1/companies` - Get all companies (with pagination & search)
 - `GET /api/v1/companies/:id` - Get company by ID
@@ -246,13 +246,15 @@ $ npm run test:cov           # Run tests with coverage
 - `GET /api/v1/job-applications/:id` - Get application by ID
 - `PUT /api/v1/job-applications/:id/status` - Update application status
 
-### User Management (`/api/v1/users`)
+### User Management (`/api/v1/users`) 🔒 **Secured**
 
-- `GET /api/v1/users` - Get all users (with pagination & search)
-- `GET /api/v1/users/with-deleted` - Get all users including soft deleted (with pagination & search)
-- `GET /api/v1/users/:id` - Get user by ID
-- `POST /api/v1/users` - Create user
-- `PUT /api/v1/users/:id` - Update user
+- `GET /api/v1/users` - Get basic user info (public listing with pagination & search)
+- `GET /api/v1/users/:id` - Get user profile (full data for own profile, basic info for others)
+- `PUT /api/v1/users/:id` - Update own profile only
+- `PUT /api/v1/users/:id/deactivate` - Deactivate own account (soft delete)
+
+**Note**: User creation, deletion, and admin operations moved to `/api/v1/admin/users`
+
 - `DELETE /api/v1/users/:id` - Delete user
 - `PUT /api/v1/users/:id/deactivate` - Soft delete user
 - `PUT /api/v1/users/:id/restore` - Restore soft deleted user
@@ -263,7 +265,7 @@ $ npm run test:cov           # Run tests with coverage
 - `GET /api/v1/profile/admin-only` - Admin-only test endpoint
 - `GET /api/v1/profile/hr-or-admin` - HR or Admin test endpoint
 
-### Visitor Management (`/api/v1/visitors`)
+### Visitor Management (`/api/v1/visitors`) 🔒 **Secured**
 
 - `GET /api/v1/visitors` - Get all visitors (with pagination & search)
 - `GET /api/v1/visitors/:id` - Get visitor by ID
@@ -302,11 +304,29 @@ All "Get All" endpoints now support pagination with the following query paramete
 
 ## 🔐 Authentication & Authorization
 
+### 🔒 Security Model
+
+**All endpoints now require authentication except:**
+
+- Job browsing (`GET /api/v1/job-posts`)
+- Job applications (`POST /api/v1/job-applications/apply/:jobId`)
+- Authentication endpoints (`/api/v1/auth/*`)
+
 ### Role-Based Access Control
 
-- **Admin**: Full system access, can create company owners
+- **Admin**: Full system access, user management, company oversight
 - **Company Owner**: Manage their company, create HR users, manage job posts and applications
 - **HR**: Manage job posts and applications for their assigned company
+
+### 🛡️ User Endpoint Security
+
+| Endpoint                           | Access Level            | Description                                  |
+| ---------------------------------- | ----------------------- | -------------------------------------------- |
+| `GET /api/v1/users`                | **Authenticated Users** | Basic info only (name, role)                 |
+| `GET /api/v1/users/:id`            | **Owner + Basic Info**  | Full profile for self, basic info for others |
+| `PUT /api/v1/users/:id`            | **Owner Only**          | Can only update own profile                  |
+| `PUT /api/v1/users/:id/deactivate` | **Owner Only**          | Can only deactivate own account              |
+| `POST /api/v1/admin/users`         | **Admin Only**          | User creation restricted to admins           |
 
 ### JWT Token Structure
 

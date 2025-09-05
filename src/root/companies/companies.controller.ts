@@ -1,5 +1,6 @@
 import { PaginatedResponse } from '@/common/dto/pagination.dto';
 import { Company } from '@/entities/company.entity';
+import { JwtAuthGuard } from '@/root/auth/guards/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -10,8 +11,10 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -24,7 +27,9 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @ApiTags('companies')
+@ApiBearerAuth()
 @Controller('companies')
+@UseGuards(JwtAuthGuard)
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 

@@ -1,5 +1,6 @@
 import { PaginatedResponse } from '@/common/dto/pagination.dto';
 import { Visitor } from '@/entities/visitor.entity';
+import { JwtAuthGuard } from '@/root/auth/guards/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -10,8 +11,10 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -24,7 +27,9 @@ import { UpdateVisitorDto } from './dto/update-visitor.dto';
 import { VisitorsService } from './visitors.service';
 
 @ApiTags('visitors')
+@ApiBearerAuth()
 @Controller('visitors')
+@UseGuards(JwtAuthGuard)
 export class VisitorsController {
   constructor(private readonly visitorsService: VisitorsService) {}
 
