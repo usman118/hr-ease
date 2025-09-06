@@ -2,8 +2,7 @@ import { PaginatedResponse } from '@/common/dto/pagination.dto';
 import { User } from '@/entities/user.entity';
 import {
   AssignCompanyDto,
-  CreateUserDto,
-  InviteUserDto,
+  CreateOwnerOrHrDto,
 } from '@/root/auth/dto/admin-user.dto';
 import { AdminGuard } from '@/root/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@/root/auth/guards/jwt-auth.guard';
@@ -47,26 +46,25 @@ export class AdminController {
 
   @Post('users')
   @UseGuards(AdminGuard)
-  async createUser(
-    @Body() createUserDto: CreateUserDto,
-    @Req() req: RequestWithUser,
-  ): Promise<{ message: string; user: User }> {
-    const result = await this.adminService.createUser(createUserDto, req.user);
-    return {
-      message: 'User created successfully',
-      user: result.user,
-    };
-  }
-
-  @Post('users/invite')
-  @UseGuards(AdminGuard)
-  async inviteUser(
-    @Body() inviteUserDto: InviteUserDto,
+  @ApiOperation({
+    summary: 'Create owner or HR user with invitation',
+    description:
+      'Create a company owner or HR user. Company is optional for owners, required for HR. User will receive an invitation email.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User created and invitation sent successfully',
+  })
+  async createOwnerOrHr(
+    @Body() createOwnerOrHrDto: CreateOwnerOrHrDto,
     @Req() req: RequestWithUser,
   ): Promise<{ message: string; user: User; invitationToken: string }> {
-    const result = await this.adminService.inviteUser(inviteUserDto, req.user);
+    const result = await this.adminService.createOwnerOrHr(
+      createOwnerOrHrDto,
+      req.user,
+    );
     return {
-      message: 'User invited successfully. Invitation email has been sent.',
+      message: 'User created and invitation sent successfully',
       user: result.user,
       invitationToken: result.invitationToken,
     };

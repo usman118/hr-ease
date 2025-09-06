@@ -6,8 +6,7 @@ import { UserRole } from '@/enums/user.enum';
 import { AuthHelper } from '@/helpers';
 import {
   AssignCompanyDto,
-  CreateUserDto,
-  InviteUserDto,
+  CreateOwnerOrHrDto,
 } from '@/root/auth/dto/admin-user.dto';
 import { EmailService } from '@/services/email.service';
 import { UserInvitationTemplate } from '@/templates/user-invitation.template';
@@ -31,45 +30,16 @@ export class AdminService {
     private emailService: EmailService,
   ) {}
 
-  async createUser(
-    createUserDto: CreateUserDto,
-    _adminUser: User,
-  ): Promise<{ user: User; tempPassword: string }> {
-    const { email, firstName, lastName, role } = createUserDto;
-
-    // Check if email is already in use
-    await AuthHelper.checkEmailAvailability(this.userRepo, email);
-
-    // Generate temporary password
-    const temporaryPassword = AuthHelper.generateRandomToken(12);
-    const hashedPassword = await AuthHelper.hashPassword(temporaryPassword);
-
-    // Log temporary password for testing purposes
-    this.logger.log(`Temporary password for ${email}: ${temporaryPassword}`);
-
-    // Create user
-    const user = this.userRepo.create({
-      email,
-      firstName,
-      lastName,
-      role,
-      password: hashedPassword,
-      isActive: true,
-    });
-
-    const savedUser = await this.userRepo.save(user);
-
-    return {
-      user: savedUser,
-      tempPassword: temporaryPassword,
-    };
-  }
-
-  async inviteUser(
-    inviteUserDto: InviteUserDto,
+  async createOwnerOrHr(
+    createOwnerOrHrDto: CreateOwnerOrHrDto,
     adminUser: User,
   ): Promise<{ user: User; invitationToken: string }> {
-    const { email, firstName, lastName, role, companyId } = inviteUserDto;
+    const { email, firstName, lastName, role, companyId } = createOwnerOrHrDto;
+
+    // Validate role and company requirements
+    if (role === UserRole.HR && !companyId) {
+      throw new BadRequestException('Company ID is required for HR users');
+    }
 
     // Check if email is already in use
     await AuthHelper.checkEmailAvailability(this.userRepo, email);
@@ -95,10 +65,7 @@ export class AdminService {
 
     // Handle company assignment if provided
     let companyName = '';
-    if (
-      companyId &&
-      (role === UserRole.COMPANY_OWNER || role === UserRole.HR)
-    ) {
+    if (companyId) {
       const company = await this.companyRepo.findOne({
         where: { id: companyId },
       });

@@ -5,7 +5,6 @@ import { CompaniesModule } from '@/root/companies/companies.module';
 import { CompanyOwnerModule } from '@/root/company-owner/company-owner.module';
 import { JobApplicationsModule } from '@/root/job-applications/job-applications.module';
 import { JobPostsModule } from '@/root/job-posts/job-posts.module';
-import { ProfileModule } from '@/root/profile/profile.module';
 import { UsersModule } from '@/root/users/users.module';
 import { VisitorsModule } from '@/root/visitors/visitors.module';
 import { Module } from '@nestjs/common';
@@ -26,7 +25,7 @@ import { ConfigModule } from '@nestjs/config';
     CompanyOwnerModule,
     JobApplicationsModule,
     JobPostsModule,
-    ProfileModule,
+    // ProfileModule,
     UsersModule,
     VisitorsModule,
   ],

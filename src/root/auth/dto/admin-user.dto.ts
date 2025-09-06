@@ -2,10 +2,10 @@ import { UserRole } from '@/enums/user.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateUserDto {
+export class CreateOwnerOrHrDto {
   @ApiProperty({
     description: 'User email address',
-    example: 'owner@company.com',
+    example: 'user@company.com',
   })
   @IsEmail()
   email: string;
@@ -25,59 +25,22 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({
-    description: 'User role',
+    description: 'User role - either company_owner or hr',
     example: 'company_owner',
-    enum: UserRole,
+    enum: [UserRole.COMPANY_OWNER, UserRole.HR],
   })
-  @IsEnum(UserRole)
-  role: UserRole;
+  @IsEnum([UserRole.COMPANY_OWNER, UserRole.HR])
+  role: UserRole.COMPANY_OWNER | UserRole.HR;
 
   @ApiProperty({
-    description: 'Company ID to assign user to (optional)',
+    description:
+      'Company ID to assign user to. Optional for owners, required for HR',
     example: 'uuid-company-id',
     required: false,
   })
   @IsOptional()
   @IsUUID()
   companyId?: string;
-}
-
-export class InviteUserDto {
-  @ApiProperty({
-    description: 'User email address',
-    example: 'hr@company.com',
-  })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({
-    description: 'User first name',
-    example: 'Jane',
-  })
-  @IsString()
-  firstName: string;
-
-  @ApiProperty({
-    description: 'User last name',
-    example: 'Smith',
-  })
-  @IsString()
-  lastName: string;
-
-  @ApiProperty({
-    description: 'User role',
-    example: 'hr',
-    enum: UserRole,
-  })
-  @IsEnum(UserRole)
-  role: UserRole;
-
-  @ApiProperty({
-    description: 'Company ID to assign user to',
-    example: 'uuid-company-id',
-  })
-  @IsUUID()
-  companyId: string;
 }
 
 export class AssignCompanyDto {
